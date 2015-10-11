@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.common.model.BoardMapper">
+	<!-- 글읽기 -->
+	<select id="boardRead" parameterType="Integer" resultType="org.admin.board.model.BoardVO">
+		select * from tbl_board,tbl_member
+		where tbl_board.userid=tbl_member.userid
+		AND boardNo='${boardNo}'
+	</select>
+
+	<!-- 글리스트 -->
+	<select id="boardList" parameterType="org.admin.board.model.BoardCriteria" resultType="org.admin.board.model.BoardVO">
+		select boardno,title,boardcontent,regdate,updatedate,replycnt,viewcnt,recomcnt,reportcnt, t1.userid, t2.username, t2.grade
+		from tbl_board t1,(
+		  select userid,username,grade 
+		  from tbl_member) t2
+		where t1.userid=t2.userid
+		<if test="boardType eq '일반'">
+		AND t2.grade = '일반'
+		</if>
+		<if test="boardType eq '작가'">
+		AND t2.grade = '작가'
+		</if>
+		<if test="boardType eq '전체'">
+		AND (t2.grade = '일반'
+		OR t2.grade = '작가')
+		</if>
+		<if test="boardType eq '관리자'">
+		AND (t2.grade = '일반'
+		OR t2.grade = '작가')
+		</if>
+		<if test="boardType eq ''">
+		AND (t2.grade = '일반'
+		OR t2.grade = '작가')
+		</if>
+		<if test="searchType eq '전체'">
+		AND (t1.title like '%'||#{keyword}||'%'
+    	OR t2.username like '%'||#{keyword}||'%'
+    	OR t1.userid like '%'||#{keyword}||'%'
+    	OR t1.boardcontent like '%'||#{keyword}||'%')
+		</if>
+		<if test="searchType eq '제목'">
+		AND t1.title like '%'||#{keyword}||'%'
+		</if>
+		<if test="searchType eq '이름'">
+		AND t2.username like '%'||#{keyword}||'%'
+		</if>
+		<if test="searchType eq '아이디'">
+		AND t1.userid like '%'||#{keyword}||'%'
+		</if>
+		<if test="searchType eq '내용'">
+		AND t1.boardcontent like '%'||#{keyword}||'%'
+		</if>
+		order by ${sortkey} ${sortType}
+	</select>
+
+	<!-- 글등록 -->
+	<insert id="autherBoardWrite" parameterType="org.admin.board.model.BoardVO">
+		insert into tbl_board
+		(BOARDNO, BOARDTYPE, title, BOARDCONTENT, USERID, REGDATE)
+		values (s_boardno.nextval,'작가', '${title}', '${boardContent}', '${userid}', sysdate)
+	</insert>
+	<insert id="userBoardWrite" parameterType="org.admin.board.model.BoardVO">
+		insert into tbl_board
+		(BOARDNO, BOARDTYPE, title, BOARDCONTENT, USERID, REGDATE)
+		values (s_boardno.nextval,'일반', '${title}', '${boardContent}', '${userid}', sysdate)
+	</insert>
+	<insert id="adminBoardWrite" parameterType="org.admin.board.model.BoardVO">
+		insert into tbl_board
+		(BOARDNO, BOARDTYPE, title, BOARDCONTENT, USERID, REGDATE)
+		values (s_boardno.nextval,'공지', '${title}', '${boardContent}', '${userid}', sysdate)
+	</insert>
+
+	<!-- 글수정 -->
+	<update id="boardUpdate" parameterType="org.admin.board.model.BoardVO">
+		update tbl_board set
+		title = '#{title}',
+		boardContent = '${boardContent}',
+		updatedate = sysdate
+		where boardNo='${boardNo}'
+	</update>
+
+	<!-- 글삭제 -->
+	<delete id="boardDelete" parameterType="Integer">
+		delete from tbl_board
+		where boardNo = '${boardNo}'
+	</delete>
+
+	<!-- 게시글 토탈카운트 -->
+	<select id="boardTotalCnt" parameterType="org.admin.board.model.BoardCriteria" resultType="Integer">
+		select count(*)
+		from tbl_board t1,(
+		  select userid,username,grade 
+		  from tbl_member) t2
+		where t1.userid=t2.userid
+		<if test="boardType eq '일반'">
+		AND t2.grade = '일반'
+		</if>
+		<if test="boardType eq '작가'">
+		AND t2.grade = '작가'
+		</if>
+		<if test="boardType eq '전체'">
+		AND (t2.grade = '일반'
+		OR t2.grade = '작가')
+		</if>
+		<if test="boardType eq '관리자'">
+		AND (t2.grade = '일반'
+		OR t2.grade = '작가')
+		</if>
+		<if test="boardType eq ''">
+		AND (t2.grade = '일반'
+		OR t2.grade = '작가')
+		</if>
+		<if test="searchType eq '전체'">
+		AND (t1.title like '%'||#{keyword}||'%'
+    	OR t2.username like '%'||#{keyword}||'%'
+    	OR t1.userid like '%'||#{keyword}||'%'
+    	OR t1.boardcontent like '%'||#{keyword}||'%')
+		</if>
+		<if test="searchType eq '제목'">
+		AND t1.title like '%'||#{keyword}||'%'
+		</if>
+		<if test="searchType eq '이름'">
+		AND t2.username like '%'||#{keyword}||'%'
+		</if>
+		<if test="searchType eq '아이디'">
+		AND t1.userid like '%'||#{keyword}||'%'
+		</if>
+		<if test="searchType eq '내용'">
+		AND t1.boardcontent like '%'||#{keyword}||'%'
+		</if>
+		order by ${sortkey} ${sortType}
+	</select>
+	
+	
+	<!-- 게시글 신고기능 -->
+	<select id="boardReportList" parameterType="Integer" resultType="org.admin.board.model.BoardReportVO"><!-- 신고리스트 -->
+		select * from
+		tbl_boardreport
+		where tbl_boardreport.boardNo=${boardNo}
+		order by reportNo desc
+	</select>
+	<select id="boardReportRead" parameterType="Integer" resultType="org.admin.board.model.BoardReportVO"><!-- 신고글 조회 -->
+		select * from tbl_boardreport,tbl_member
+		where tbl_boardreport.userid=tbl_member.userid
+		AND reportNo='${reportNo}'
+	</select>
+	<delete id="boardReportDelete" parameterType="Integer"><!-- 신고글 삭제 -->
+		delete from tbl_boardreport
+		where reportNo = '${reportNo}'
+	</delete>
+	<select id="boardReportCnt" parameterType="org.admin.board.model.BoardVO" resultType="Integer"><!-- 신고글 수 -->
+		select count(*) from tbl_board b,tbl_boardreport r where b.boardno = r.boardno and b.boardno = '${boardNo}'
+	</select>
+
+
+	<!-- 게시글 댓글기능 -->
+	
+
+</mapper>

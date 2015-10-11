@@ -1,0 +1,381 @@
+#books div div div div img {
+    margin-top: 60px;
+    width: 90px;
+    height: 120px;
+}
+
+#books div div div div img:hover {
+    width: 120px;
+    height: 160px;
+    margin-top: 20px;
+    transition: 100ms all;
+}
+
+.viewbookeffect {
+    left: 450px;
+    top: 600px;
+    width: 450px;
+    height: 600px;
+}
+
+
+.submenu{
+	color: #666666;
+	cursor: pointer;
+}
+.submenu:hover{
+	transition: 250ms all;
+    color: #c12e2a;
+}
+.select_submenu{
+	color: #c12e2a;
+}
+
+.submenuG{
+	color: #666666;
+	cursor: pointer;
+}
+.submenuG:hover{
+	transition: 250ms all;
+    color: #1BBD36;
+}
+.select_submenuG{
+	color: #1BBD36;
+}
+
+.submenu-pink {
+    margin: 0;
+    padding: 0;
+    height: 20px;
+    font-size: 12px;
+    color: black;
+    cursor: pointer;
+}
+
+.submenu_select-pink {
+    margin: 0;
+    padding: 0;
+    height: 20px;
+    font-size: 12px;
+    background-color: #f7f6f3;
+    color: black;
+    cursor: pointer;
+}
+
+.submenu-pink:hover {
+    transition: 250ms all;
+    background-color: #f7f6f3;
+}
+
+.submenu-blue {
+    margin: 0;
+    padding: 0;
+    height: 20px;
+    font-size: 12px;
+    color: black;
+    cursor: pointer;
+}
+
+.submenu_select-blue {
+    margin: 0;
+    padding: 0;
+    height: 20px;
+    font-size: 12px;
+    background-color: #d9eefd;
+    color: black;
+    cursor: pointer;
+}
+
+.submenu-blue:hover {
+    transition: 250ms all;
+    background-color: #d9eefd;
+}
+
+.submenu-beige {
+    margin: 0;
+    padding: 0;
+    height: 20px;
+    font-size: 12px;
+    color: black;
+    cursor: pointer;
+}
+
+.submenu_select-beige {
+    margin: 0;
+    padding: 0;
+    height: 20px;
+    font-size: 12px;
+    background-color: #fbf0d3;
+    color: black;
+    cursor: pointer;
+}
+
+.submenu-beige:hover {
+    transition: 250ms all;
+    background-color: #fbf3db;
+}
+
+.pagebttn {
+    border: hidden;
+    width: 30px;
+    height: 30px; 
+    border-radius: 50%;
+    background-color: #f4f4f4;
+    text-align: center;
+}
+
+.pagebttn_select {
+    border: hidden;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    text-align: center;
+    background-color: #c9c9c9;
+    color: white;
+    font-weight: bold;
+}
+
+.pagebttn:hover {
+    transition: 250ms all;
+    background-color: #c9c9c9;
+    color: white;
+}
+
+.mainmenu li {
+    cursor: pointer;
+}
+
+.row iframe {
+    width: 80%;
+    height: 1000px;
+    border: hidden;
+}
+
+.companyInfo {
+    color: #CCCCCC;
+    font-size: 12px;
+}
+
+.mtzero {
+    margin-top: 0;
+}
+
+.mbzero {
+    margin-bottom: 0;
+}
+
+.mrzero {
+    margin-right: 0;
+}
+
+.mlzero {
+    margin-left: 0;
+}
+
+.ptzero {
+    padding-top: 0;
+}
+
+.pbzero {
+    padding-bottom: 0;
+}
+
+.przero {
+    padding-right: 0;
+}
+
+.plzero {
+    padding-left: 0;
+}
+
+.shelfType {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.bookOnShelf {
+	height: 150px;
+    float: left;
+    z-index: 10;
+    padding-bottom: 25px;
+}
+
+
+.shelfPagingBttn {
+    font-size: 15px;
+    color: white;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.bookList {
+    background-size : 100% 100%;
+    width: 6em;
+    height: 8em;
+}
+.noborder{
+    border: hidden;
+}
+.subTitle{
+    font-size: 28px;
+    color: #c12e2a;
+    font-weight: bold;
+}
+.category{
+    color: #666666;
+    font-weight: bold;
+}
+
+.whiteArea-10{
+    height: 10px;
+    width:100%;
+    background-color: #FFFFFF;
+}
+.whiteArea-20{
+    height: 20px;
+    width:100%;
+    background-color: #FFFFFF;
+}
+.whiteArea-30{
+    height: 30px;
+    width:100%;
+    background-color: #FFFFFF;
+}
+.grayLine{
+    height: 1px;
+    width:100%;
+    background-color: #DDDDDD;
+}
+.crownsize{
+    width:30px;
+    height:30px;
+}
+.bookSimpleInfo{
+    vertical-align: middle;
+    padding: 10px 20px 10px 20px;
+}
+.booklist-tr:hover{
+	background-color: #f5f5f5;
+	border: 15px;
+	border-color: white;
+}
+
+
+.booklist-title{
+	text-align: left;
+	padding-left: 10px;
+}
+
+
+
+
+
+.btn-read {
+  color: #fff;
+  background-color: #898fc3;
+  border-color: #858bc2;
+  width: 115px;
+}
+.btn-read:hover,
+.btn-read:focus,
+.btn-read.focus,
+.btn-read:active,
+.btn-read.active,
+.open > .dropdown-toggle.btn-read {
+  color: #fff;
+  background-color: #7279b6;
+  border-color: #6e75b5;
+}
+.btn-read:active,
+.btn-read.active,
+.open > .dropdown-toggle.btn-read {
+  background-image: none;
+}
+.btn-read.disabled,
+.btn-read[disabled],
+fieldset[disabled] .btn-read,
+.btn-read.disabled:hover,
+.btn-read[disabled]:hover,
+fieldset[disabled] .btn-read:hover,
+.btn-read.disabled:focus,
+.btn-read[disabled]:focus,
+fieldset[disabled] .btn-read:focus,
+.btn-read.disabled.focus,
+.btn-read[disabled].focus,
+fieldset[disabled] .btn-read.focus,
+.btn-read.disabled:active,
+.btn-read[disabled]:active,
+fieldset[disabled] .btn-read:active,
+.btn-read.disabled.active,
+.btn-read[disabled].active,
+fieldset[disabled] .btn-read.active {
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+}
+
+
+
+
+.cursor-p{
+	cursor: pointer;
+}
+
+.f10{font-size: 10px;}.f12{font-size: 12px;}.f16{font-size: 16px;}.f20{font-size: 20px;}.f24{font-size: 24px;}.f28{font-size: 28px;}.f30{font-size: 30px;}
+.whiteF{color: #FFFFFF;}.grayADF{color: #333333;}.grayDF{color: #666666;}.grayMF{color: #A9A9A9;}.grayLF{color: #DDDDDD;}.grayALF{color: #EEEEEE}.blackF{color: #101010;}.redF{color: #c12e2a;}.greenF{color: #1BBD36;}.blueF{color: #286090;}
+.b{font-weight: bold}
+.grayALBG{background-color: #EEEEEE}.grayLBG{background-color: #DDDDDD}.grayMBG{background-color: #A9A9A9}.grayDBG{background-color: #666666}.grayADBG{background-color: #333333;}.redBG{background-color: #c12e2a}.blueBG{background-color: #286090}.greenBG{background-color: #1BBD36}.whiteBG{background-color: #FFFFFF}.blackBG{background-color: #101010}
+
+
+
+
+
+.goodpoint{
+    color: #3e8f3e;
+}
+.sopoint{
+    color: #e38d13;
+}
+.badpoint{
+    color: #a94442;
+}
+
+.border_div { display: inline-block; border: solid 1px #ccc; font-size: 9pt; }
+
+.like{
+	background-image: URL(/resources/usertemplate/images/like.png);
+	transition: 250ms all;
+	background-size: 100% 100%;
+	width:30px; height:30px; cursor: pointer;
+}
+.nolike{
+	background-image: URL('/resources/usertemplate/images/nolike.png');
+	transition: 250ms all;
+	background-size: 100% 100%;
+	width:30px; height:30px; cursor: pointer;
+}
+
+
+@-webkit-keyframes blink {
+    0%{
+        opacity: 0;
+    }
+    25%{
+        opacity: 0.5;
+    }
+    100%{
+        opacity: 0;
+    }
+}

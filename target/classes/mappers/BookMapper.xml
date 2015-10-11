@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.common.model.BookMapper">
+	<!-- 공통으로 사용할 select 절 정의 -->
+	<sql id="select-all">
+		select * from
+	</sql>
+	<!-- Book -->
+	<!-- Book where-no 절 정의 -->
+	<sql id="book-no">
+		where bookno = #{bookno}
+	</sql>
+	
+	<!-- select 검색 쿼리문 정의 -->
+	<sql id="search-searchType">
+		<if test="searchType != null">
+			<if test="searchType == '제목'.toString()">
+				and b.title like ( '%' || #{keyword} || '%' )
+			</if>
+		</if>
+	</sql>
+	<sql id="search-username">
+		<if test="searchType != null">
+			<if test="searchType == '작가'.toString()">
+				and m.username like ( '%' || #{keyword} || '%' )
+			</if>
+		</if>
+	</sql>
+	<sql id="search-convert">
+		<if test="convertType != null">
+			and b.convertstate like #{convertType}
+		</if>
+	</sql>
+	<sql id="search-categoryType">
+		<if test="categoryType != null">
+			and b.bookcategory = #{categoryType}
+		</if>
+	</sql>
+	<sql id="search-chargeType">
+		<if test="chargeType != null">
+			and m.grade = #{chargeType}
+		</if>
+	</sql>
+	<sql id="search-isReportZero">
+		<if test="isReportZero != null">
+			<if test="isReportZero == 'true'">
+				and b.reportcnt = 0
+			</if>
+			<if test="isReportZero == 'false'">
+				and b.reportcnt > 0
+			</if>
+		</if>
+	</sql>
+	<sql id="search-all">
+		<if test="searchType == '전체'.toString()">
+			and (b.title like ( '%' || #{keyword} || '%' )
+				 or m.username like ( '%' || #{keyword} || '%' ))
+		</if>
+	</sql>
+	<!-- select 정렬 쿼리문 정의 -->
+	<sql id="sort-t">
+		<if test="sortType != null">
+			<!-- applydate sort -->
+			<if test="sortType == '등록일'.toString()">
+				order by applydate
+			</if>
+			<!-- sellcnt sort -->
+			<if test="sortType == '판매량'.toString()">
+				order by sellcnt
+			</if>
+			<!-- starpoint sort -->
+			<if test="sortType == '평점'.toString()">
+				order by starpoint
+			</if>
+		</if>
+		<if test="sortType == null ||sortType == ''">
+			order by applydate
+		</if>
+	</sql>
+	<sql id="sort-d">
+		<if test="sortDirection != null">
+			<if test="sortDirection == 'desc'.toString()">
+				desc
+			</if>
+			<if test="sortDirection == 'asc'.toString()">
+				asc
+			</if>
+		</if>
+		<if test="sortDirection == null"> desc </if>
+	</sql>
+	<sql id="sort-second">
+		<if test="sortType != (null or '등록일'.toString())">
+			, applydate desc
+		</if>
+	</sql>
+	<!-- insert 쿼리문 정의 -->
+	<insert id="createBook" parameterType="BookVO">
+		insert into tbl_book 
+		(bookno, title, bookcategory, pubcompany, pubdate, overview, series,
+		pdfpath, bookversion, userid)
+		values(s_bookno.nextval,
+		#{title}, #{bookcategory}, #{pubcompany},
+		#{pdfpath}, #{pubdate},
+		#{overview}, #{series}, #{bookversion}, #{userid})
+	</insert>
+	<insert id="createIndieBook" parameterType="BookVO">
+		insert into tbl_book 
+		(bookno, title, bookcategory, overview, series,
+		pdfpath, bookversion, userid)
+		values(s_bookno.nextval,
+		#{title}, #{bookcategory}, #{overview}, #{series},
+		#{pdfpath}, #{bookversion}, #{userid})
+	</insert>
+	<!-- select 쿼리문 정의 -->
+	<select id="readBook" parameterType="Integer" resultType="BookVO">
+		select b.bookno, b.title, b.bookcategory, b.pubcompany, b.pubdate, b.overview, b.series,
+			   b.pdfpath, b.bookversion, b.applydate, b.convertstate, b.totalpage, b.sellcnt, b.starpoint,
+			   b.reportcnt, b.convertstate, m.userid, m.username, m.grade
+		from tbl_book b, tbl_member m
+		where b.userid = m.userid
+		and bookno = #{bookno}
+	</select>
+	<select id="totalBookCnt" resultType="Integer">
+		select count(*) 
+		from tbl_book b, tbl_member m
+		where b.userid=m.userid
+		<include refid="search-searchType" />
+		<include refid="search-username" />
+		<include refid="search-categoryType" />
+		<include refid="search-chargeType" />
+		<include refid="search-isReportZero"/>
+		<include refid="search-convert"/>
+		<include refid="search-all"/>
+	</select>
+	<select id="bookTotalPage" parameterType="Integer" resultType="Integer">
+		select totalpage
+		from tbl_book
+		where bookno = #{bookno}
+	</select>
+	<select id="readPDFPath" parameterType="Integer" resultType="String">
+		select pdfpath from
+		tbl_book
+		<include refid="book-no" />
+	</select><!-- Test -->
+	<select id="readIMGPath" parameterType="Integer" resultType="String">
+		select imgpath from
+		tbl_convertbook
+		<include refid="book-no" />
+		and pageno = #{pageno}
+	</select>
+	
+	<!-- paging & search 쿼리 -->
+	<select id="listSearchBook" parameterType="BookCriteria" resultType="BookVO">
+		select * 
+		from(select rownum rn, bookno, title, bookcategory, pubcompany, pubdate,
+			        overview, series, pdfpath, bookversion, applydate, convertstate, totalpage, starpoint,
+			        sellcnt, reportcnt, userid, username, grade
+			 from(
+	           select bookno, title, bookcategory, pubcompany, pubdate,
+				      overview, series, pdfpath, bookversion, applydate, convertstate, totalpage, starpoint,
+				      sellcnt, reportcnt, userid, username, grade
+	           from(
+			           	select b1.bookno, b1.title, b1.bookcategory, b1.pubcompany, b1.pubdate,
+						      b1.overview, b1.series, b1.pdfpath, b1.bookversion, b1.applydate, b1.convertstate, b1.totalpage, b1.starpoint,
+						      b1.sellcnt, b1.reportcnt, m1.userid, m1.username, m1.grade
+			            from (select /*+index_desc(tbl_book pk_book)*/bookno, title, bookcategory, pubcompany, pubdate,
+			                    overview, series, pdfpath, bookversion, applydate, convertstate, totalpage, starpoint,
+			                    sellcnt, reportcnt, userid
+			                  from tbl_book b
+				               where bookno > 0
+				               and bookversion = 1.0
+							 	  <include refid="search-searchType" />
+							 	  <include refid="search-categoryType" />
+							 	  <include refid="search-convert"/>
+							 	  <include refid="search-isReportZero"/>
+				              )b1,
+				              (select username,userid,grade
+				               from tbl_member m
+				               where length(userid) > 0
+				               <include refid="search-username" />
+				               <include refid="search-chargeType" />
+				              ) m1
+					   	where b1.userid=m1.userid
+					    <if test="searchType == '전체'.toString()">
+							and (b1.title like ( '%' || #{keyword} || '%' )
+								 or m1.username like ( '%' || #{keyword} || '%' ))
+						</if>)
+	           <include refid="sort-t" />
+	           <include refid="sort-d" />
+	           <include refid="sort-second"/>)
+			 where rownum &lt;= #{endNum})
+		where rn > #{startNum}		
+	</select>
+	<select id="listConvertReady" resultType="Integer">
+		select bookno
+		from tbl_book
+		where convertstate like '변환대기'
+	</select>
+	<select id="listVersion" resultType="BookVO">
+		select /*+index_desc(tbl_book pk_book)*/bookno, title, bookcategory, pubcompany, pubdate,
+                overview, series, pdfpath, bookversion, applydate, convertstate, totalpage, starpoint,
+                sellcnt, reportcnt, userid
+        from tbl_book
+        where bookno > 0
+        and userid = #{userid}
+        and title = #{title}
+	</select>
+	
+	<!-- update 쿼리문 정의 -->
+	<sql id="book-update">
+		update tbl_book set
+	</sql>
+	<update id="updateBook" parameterType="BookVO">
+		<include refid="book-update" />
+		bookcategory = #{bookcategory}, overview = #{overview}
+		<include refid="book-no" />
+	</update>
+	<update id="updateConvertstate">
+		<include refid="book-update" />
+		convertstate = #{convertstate}
+		<include refid="book-no" />
+	</update>
+	<update id="updateStarPoint">
+		<include refid="book-update" />
+		starpoint = #{starPoint_avg}
+		<include refid="book-no" /><!--test -->
+	</update>
+	<update id="addReportCnt" parameterType="Integer">
+		<include refid="book-update" />
+		reportcnt = reportcnt + 1
+		<include refid="book-no" />
+	</update>
+	<update id="deleteReportCnt" parameterType="Integer">
+		<include refid="book-update" />
+		reportcnt = reportcnt - 1
+		<include refid="book-no" />
+	</update>
+	<update id="updatetotalPage" parameterType="Integer">
+		<include refid="book-update" />
+		totalpage = #{pageTotal}
+		<include refid="book-no" /><!-- Test -->
+	</update>
+	<update id="addSellCnt" parameterType="Integer">
+		<include refid="book-update" />
+		sellcnt = sellcnt + 1
+		<include refid="book-no" />
+	</update>
+	<!-- delete 쿼리문 정의 -->
+	<delete id="deleteBook" parameterType="Integer">
+		delete from tbl_book
+		<include refid="book-no" />
+	</delete>
+	<!-- end Book -->
+		
+	<!-- Card -->
+	<!-- Card where-no 절 정의 -->
+	<sql id="card-no">
+		where cardno = #{cardno}
+	</sql>
+	<!-- insert 쿼리문 정의 -->
+	<insert id="createCard" parameterType="CardVO">
+		insert into tbl_card
+		(cardno, cardkey, usingstate, bookno)
+		values(s_cardno.nextval, #{cardkey}, '비등록', #{bookno})
+	</insert>
+	<insert id="createCardAndregisterUser">
+		insert into tbl_card(cardno, usingstate, userid, bookno, userregdate)
+		values(s_cardno.nextval, '등록', #{userid}, #{bookno}, sysdate)
+	</insert>
+	<!-- update 쿼리문 정의 -->
+	<sql id="card-update">
+		update tbl_card set
+	</sql>
+	<update id="updateCardUser">
+		<include refid="card-update" />
+		usingstate = '사용', userid = #{userid}, userregdate = sysdate
+		where cardkey = #{cardkey}
+	</update>
+	<update id="updateCardStarpoint">
+		<include refid="card-update" />
+		starpoint = #{starpoint}
+		<include refid="card-no" />
+	</update>
+	<update id="updateCardReview" parameterType="CardVO">
+		<include refid="card-update" />
+		review = #{review}
+		<include refid="card-no" />
+	</update>
+	<update id="updateCardLikestate" parameterType="CardVO">
+		<include refid="card-update" />
+		likestate = #{likestate}
+		<include refid="card-no" />
+	</update>
+	<update id="updateCardContinuePage" parameterType="CardVO">
+		<include refid="card-update" />
+		continuepage = #{continuepage}
+		<include refid="card-no" />
+	</update>
+	<!-- delete 쿼리문 정의 -->
+	<delete id="deleteCard" parameterType="Integer">
+		delete from tbl_card
+		<include refid="card-no" />
+	</delete>
+	<select id="totalUserBookCnt" resultType="Integer">
+		select count(cardno)
+		from tbl_card c, tbl_book b, tbl_member m
+		where c.userid = #{userid}
+		and c.bookno=b.bookno and b.userid=m.userid
+		<include refid="search-shelfType"/>
+		<include refid="search-searchType"/>
+		<include refid="search-username"/>
+		<include refid="search-all"/>
+		<include refid="search-card"/>
+	</select>
+	<select id="starpointBookCnt" parameterType="Integer" resultType="Integer">
+		select count(cardno)
+		from tbl_card
+		where bookno = #{bookno}
+		and starpoint > 0
+	</select>
+	<!-- select 쿼리문 정의 -->
+	<select id="readCard" parameterType="Integer" resultType="CardVO">
+		<include refid="select-all" />
+		tbl_card
+		<include refid="card-no" />
+	</select>
+	<select id="listAllCard" resultType="CardVO">
+		<include refid="select-all" />
+		tbl_card where cardno > 0
+		<if test="bookno != null">
+			and bookno = #{bookno}
+		</if>
+		order by cardno desc
+	</select>
+	<sql id="search-card">
+		<if test="isBookMark == true">
+		  and likestate = 'O'
+		</if>
+		<if test="isContinue == true">
+		  and continuepage > 0
+		</if>
+	</sql>
+	<sql id="search-shelfType">
+		<if test="shelfType != null">
+			and m.grade = #{shelfType}
+		</if>
+	</sql>
+	<select id="listUserCard" resultType="UserCardVO">	
+		select * 
+		from(select rownum rn, bookno, title, bookcategory, pubcompany, pubdate,
+			        overview, series, bookversion, applydate, totalpage, starpoint_avg,
+			        reportcnt, userid, username, grade,
+			        cardno,starpoint,review,likestate,continuepage,userregdate
+			 from(
+	           select bookno, title, bookcategory, pubcompany, pubdate,
+				      overview, series, bookversion, applydate, totalpage, starpoint_avg,
+				      reportcnt, userid, username, grade,
+				      cardno,starpoint,review,likestate,continuepage,userregdate
+	           from(
+			           	select b1.bookno, b1.title, b1.bookcategory, b1.pubcompany, b1.pubdate,
+						      b1.overview, b1.series, b1.bookversion, b1.applydate, b1.totalpage, b1.starpoint starpoint_avg, b1.reportcnt,
+						      m1.userid, m1.username, m1.grade,c1.cardno,c1.starpoint,c1.review,c1.likestate,
+						      c1.continuepage,c1.userregdate
+			            from (select /*+index_desc(tbl_book pk_book)*/bookno, title, bookcategory, pubcompany, pubdate,
+			                    overview, series, bookversion, applydate, convertstate, totalpage, starpoint,
+			                    reportcnt, userid
+			                  from tbl_book b
+				               where bookno > 0
+							 	  <include refid="search-searchType" />
+				              )b1,
+				              (select username,userid,grade
+				               from tbl_member m
+				               where length(userid) > 0
+				               <include refid="search-username" />
+				               <include refid="search-shelfType" />
+				              ) m1,
+				              (select cardno,starpoint,review,likestate,continuepage,bookno,userregdate
+				               from tbl_card c
+				               where cardno > 0
+				               and userid = #{userid}
+				               <include refid="search-card"></include>
+				              ) c1
+					   	where c1.bookno=b1.bookno and b1.userid=m1.userid
+					    <if test="searchType == '전체'.toString()">
+							and (b1.title like ( '%' || #{keyword} || '%' )
+								 or m1.username like ( '%' || #{keyword} || '%' ))
+						</if>)
+			   order by cardno desc)
+			 where rownum &lt;= #{endNum})
+		where rn > #{startNum}
+		
+	</select>
+	<!-- end Card -->
+
+	<!-- BookAddition -->
+	<sql id="bookaddition-no">
+		where additionno = #{additionno}
+	</sql>
+	<!-- insert 쿼리 정의 -->
+	<insert id="createBookAddition" parameterType="BookAdditionVO">
+		insert into tbl_bookAddition(additionno, bookcomment, userid, convertno, addmode)
+		values(s_additionno.nextval, #{bookcomment}, #{userid}, #{convertno}, #{addmode})
+	</insert>
+	<!-- select 쿼리 정의 -->
+	<sql id="search-addmode">
+		<if test="addmode != null">
+			and addmode like #{addmode}
+		</if>
+	</sql>
+	<select id="readBookAddtion" parameterType="Integer"
+		resultType="BookAdditionVO">
+		<include refid="select-all" />
+		tbl_bookAddition
+		<include refid="bookaddition-no" />
+	</select>
+	<select id="listOnePageBookAddition" resultType="BookAdditionVO">
+		<include refid="select-all" />
+		tbl_bookAddition
+		where convertno = #{convertno}
+		<include refid="search-addmode"/>
+	</select>
+	<select id="listBookAddition" resultType="BookAdditionVO">
+		select ba.additionno, ba.bookcomment, ba.userid, ba.convertno, ba.addmode, cb.pageno
+		from tbl_bookAddition ba, tbl_convertbook cb
+		where cb.bookno = #{bookno}
+		and ba.convertno = cb.convertno
+		<if test="addmode != null">
+			and ba.addmode like #{addmode}
+		</if>
+		order by ba.convertno
+	</select>
+	<select id="bookReportCnt" parameterType="Integer" resultType="Integer">
+		select count(ba.additionno)
+		from tbl_bookAddition ba, tbl_convertbook cb
+		where cb.bookno = #{bookno}
+		and ba.convertno = cb.convertno
+		and ba.addmode like '신고'
+	</select>
+	<!-- update 쿼리 정의 -->
+	<update id="updateBookAddition" parameterType="BookAdditionVO">
+		update tbl_bookAddition
+		set bookcomment = #{bookcomment}
+		<include refid="bookaddition-no" />
+	</update>
+	<!-- delete 쿼리 정의 -->
+	<delete id="deleteBookAddition" parameterType="Integer">
+		delete from tbl_bookAddition
+		<include refid="bookaddition-no" />
+	</delete>
+	<!-- end BookAddition -->
+
+	<!-- PermitInfo -->
+   <insert id="createPermitInfo" parameterType="PermitInfoVO">
+      insert into tbl_permitinfo(permitno, bookno, permitstate <if test="reason != null">, reason</if>)
+      values(s_permitno.nextval, #{bookno}, #{permitstate} <if test="reason != null">, #{reason}</if>)
+   </insert>
+   
+   <select id="readPermitInfo" parameterType="Integer" resultType="PermitInfoVO">
+      select permitno, bookno, permitstate, reason, permitdate
+      from tbl_permitinfo
+      where permitno = #{permitno}
+   </select>
+   
+   <select id="listPermitInfo" parameterType="Integer" resultType="PermitInfoVO">
+      select permitno, bookno, permitstate, reason, permitdate
+      from tbl_permitinfo
+      where bookno = #{bookno}
+      order by permitdate desc
+   </select>
+	<!-- end PermitInfo -->
+
+	<!-- ConvertBook -->
+	<!-- ConvertBook where-no 절 정의 -->
+	<sql id="convert-no">
+		where convertno = #{convertno}
+	</sql>
+	<!-- insert 쿼리문 정의 -->
+	<insert id="createConvertBook" parameterType="ConvertBookVO">
+		insert into
+		tbl_convertbook
+		(convertno, bookno, pageno, imgpath)
+		values(s_convertno.nextval, #{bookno}, #{pageno}, #{imgpath})
+	</insert>
+	<!-- select 쿼리문 정의 -->
+	<select id="readConvertBook" parameterType="Integer"
+		resultType="ConvertBookVO">
+		<include refid="select-all" />
+		tbl_convertbook
+		<include refid="convert-no" />
+	</select>
+	<select id="listConvertBook" resultType="ConvertBookVO">
+		<include refid="select-all" />
+		tbl_convertbook
+		where convertno > 0
+		order by convertno desc
+	</select>
+	<select id="listOneConvertBook" parameterType="Integer"
+		resultType="ConvertBookVO">
+		<include refid="select-all" />
+		tbl_convertbook
+		where bookno = #{bookno}
+		order by convertno
+	</select>
+	<!-- delete 쿼리문 정의 -->
+	<delete id="deleteConvertBook" parameterType="Integer">
+		delete from tbl_convertbook
+		<include refid="convert-no" />
+	</delete>
+	<!-- end ConvertBook -->
+</mapper>

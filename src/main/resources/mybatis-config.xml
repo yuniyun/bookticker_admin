@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+  <typeAliases>
+    <typeAlias type="org.common.model.PageCriteria" alias="PageCriteria"/>
+    <typeAlias type="org.admin.book.model.BookCriteria" alias="BookCriteria"/>
+    <typeAlias type="org.common.model.BookVO" alias="BookVO"/>
+    <typeAlias type="org.common.model.CardVO" alias="CardVO"/>
+    <typeAlias type="org.common.model.UserCardVO" alias="UserCardVO"/>
+    <typeAlias type="org.admin.book.model.BookAdditionVO" alias="BookAdditionVO"/>
+    <typeAlias type="org.admin.book.model.PermitInfoVO" alias="PermitInfoVO"/>
+    <typeAlias type="org.common.model.ConvertBookVO" alias="ConvertBookVO"/>
+    <typeAlias type="org.admin.user.model.MemberVO" alias="MemberVO"/>
+    <typeAlias type="org.admin.user.model.AdminMsgVO" alias="AdminMsgVO"/>
+    <typeAlias type="org.login.model.LoginVO" alias="LoginVO"/>
+   <!--  <typeAlias type="" alias=""/>
+    <typeAlias type="" alias=""/> -->
+  </typeAliases>
+</configuration>
+

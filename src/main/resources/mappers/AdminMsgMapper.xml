@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.admin.user.model.AdminMsgMapper">
+
+	<sql id="select-readstate">
+		<if test="msgReadState != null">
+		  and a.readstate = #{msgReadState}
+		</if>
+	</sql>
+	<!-- select 쿼리문 정의 -->
+	<select id="read" parameterType="int" resultType="AdminMsgVO">
+		select a.msgno, a.msg, a.readstate, a.senddate, m.userid, m.username
+		from tbl_adminmsg a, tbl_member m
+		where msgno = #{msgno}
+		and a.userid = m.userid
+	</select>
+
+	<select id="listPage" parameterType="PageCriteria"
+		resultType="AdminMsgVO">
+		select * from(select /*+index_desc(tbl_adminmsg pk_adminmsg)*/
+						rownum rn, msgno, msg, readstate, senddate, userid
+					  from(select * from tbl_adminmsg a
+						   WHERE msgno > 0
+						   <include refid="select-readstate"/>
+						   order by msgno desc) 
+			  		  where rownum &lt;= #{endNum})
+		where rn > #{startNum}
+	</select>
+
+	<select id="listCountPage" parameterType="PageCriteria" resultType="int">
+		select count(msgno)
+		from tbl_adminmsg a
+		WHERE msgno > 0
+		<include refid="select-readstate"/>
+	</select>
+
+	<!-- insert 쿼리문 정의 -->
+	<insert id="create" parameterType="AdminMsgVO">
+		insert into tbl_adminmsg(msgno, msg, userid)
+		values(s_msgno.nextval, #{msg},#{userid})
+	</insert>
+	
+	<!-- update 쿼리문 정의 -->
+	<update id="update" parameterType="AdminMsgVO">
+		update tbl_adminmsg set readstate='읽음' where userid=#{userid} 
+	</update>
+	
+	<delete id="delete" parameterType="Integer">
+		delete from tbl_adminmsg where msgno = #{msgno}
+	</delete>
+</mapper>

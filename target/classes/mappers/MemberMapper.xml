@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.common.model.MemberMapper">
+
+	<!-- 공통으로 사용할 select 절 정의 -->
+	<sql id="select-all">
+		select * from
+	</sql>
+
+	<!-- 공통으로 사용할 where-no 절 정의 -->
+	<sql id="where-no">
+		where userid = #{userid}
+	</sql>
+
+	<!-- select 쿼리문 정의 -->
+	<select id="read" parameterType="String" resultType="MemberVO">
+		<include refid="select-all"></include>
+		tbl_member
+		<include refid="where-no"></include>
+	</select>
+
+	<select id="listAll" resultType="MemberVO">
+		<include refid="select-all"></include>
+		tbl_member
+		<include refid="sort-t" />
+		<include refid="sort-d" />
+	</select>
+
+	<select id="totalCnt" resultType="int">
+		select count(userid)
+		from tbl_member
+	</select>
+
+	<select id="listPage" parameterType="PageCriteria" resultType="MemberVO">
+		select * from(select /*+index_desc(tbl_member
+		pk_member)*/rownum rn,
+		userid, userpw, grade, username, gender, birth,
+		phone, regdate,
+		livestate,
+		mybookcnt, writingcnt from(select *
+		from
+		tbl_member
+		WHERE
+		length(userid)>0
+		order by
+		userid desc
+		) where rownum
+		&lt;= #{endNum})
+		where rn
+		>
+		#{startNum}
+	</select>
+
+	<select id="listCountPage" parameterType="PageCriteria"
+		resultType="int">
+		select count(userid) totalCount from tbl_member
+	</select>
+
+	<!-- insert 쿼리문 정의 -->
+	<insert id="create" parameterType="MemberVO">
+		insert into tbl_member
+		(userid, userpw, grade, username, gender, birth, phone, livestate)
+		values(#{userid}, #{userpw}, #{grade}, #{username}, #{gender},
+		#{birth},
+		#{phone}, #{livestate})
+	</insert>
+
+
+	<!-- update 쿼리문 정의 -->
+	<update id="update" parameterType="MemberVO">
+		update tbl_member set livestate = #{livestate}
+		<include refid="where-no"></include>
+	</update>
+
+	<!-- delete 쿼리문 정의 -->
+	<delete id="delete" parameterType="MemberVO">
+		delete from tbl_member
+		<include refid="where-no"></include>
+	</delete>
+
+	<!-- select 검색 쿼리문 정의 -->
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 'all'.toString()">
+				and username like ( '%' || #{keyword} || '%' )
+				or userid
+				like ( '%' || #{keyword} || '%' )
+				or birth like ( '%' || #{keyword}
+				|| '%' )
+			</if>
+			<if test="searchType == 'username'.toString()">
+				and username like ( '%' || #{keyword} || '%' )
+			</if>
+			<if test="searchType == 'userid'.toString()">
+				and userid like ( '%' || #{keyword} || '%' )
+			</if>
+			<if test="searchType == 'birth'.toString()">
+				and birth like ( '%' || #{keyword} || '%' )
+			</if>
+		</if>
+	</sql>
+
+
+	<sql id="search_gender">
+		<if test="checkGender != null">
+			<if test="checkGender == '남자'">
+				and gender = '남자'
+			</if>
+			<if test="checkGender == '여자'">
+				and gender = '여자'
+			</if>
+		</if>
+	</sql>
+
+	<sql id="search_grade">
+		<if test="checkGrade != null">
+			<if test="checkGrade == '일반'">
+				and grade = '일반'
+			</if>
+			<if test="checkGrade == '작가'">
+				and grade = '작가'
+			</if>
+		</if>
+	</sql>
+
+	<sql id="search_livestate">
+		<if test="checkLiveState != null">
+			<if test="checkLiveState == '사용중'">
+				and livestate = '사용중'
+			</if>
+			<if test="checkLiveState == '탈퇴'">
+				and livestate = '탈퇴'
+			</if>
+		</if>
+	</sql>
+
+	<select id="listSearch" parameterType="org.admin.user.model.MemberCriteria"
+		resultType="MemberVO">
+		select * from(select /*+index_desc(tbl_member
+		pk_member)*/rownum rn,
+		userid, userpw, grade, username, gender, birth,
+		phone, regdate,
+		livestate,
+		mybookcnt, writingcnt from(select *
+		from
+		tbl_member
+		WHERE
+		length(userid)>0
+		<include refid="search_gender" />
+		<include refid="search_grade" />
+		<include refid="search_livestate" />
+		<include refid="search" />
+		<include refid="sort-t" />
+		<include refid="sort-d" />
+		)
+		where rownum &lt;= #{endNum})
+		where rn
+		>
+		#{startNum}
+
+	</select>
+
+	<select id="listSearchCount" parameterType="org.admin.user.model.MemberCriteria"
+		resultType="int">
+		select count(userid)
+		from tbl_member
+		WHERE
+		length(userid)>0
+		<include refid="search_gender" />
+		<include refid="search_grade" />
+		<include refid="search_livestate" />
+		<include refid="search" />
+		<include refid="sort-t" />
+		<include refid="sort-d" />
+	</select>
+
+	<!-- select sort 쿼리 정의 -->
+	<!-- sort 쿼리문 정의 -->
+	<sql id="sort-t">
+		
+		<if test="sortType != null">
+			<!-- mybookcnt sort -->
+			<if test="sortType == 'mybookcnt'.toString()">
+				order by mybookcnt
+			</if>
+			<!-- writingcnt sort -->
+			<if test="sortType == 'writingcnt'.toString()">
+				order by writingcnt
+			</if>
+			<!-- regdate sort -->
+			<if test="sortType == 'regdate'.toString()">
+				order by regdate
+			</if>
+		</if>
+		<if test="sortType == null ||sortType == ''">
+			order by regdate
+		</if>
+	</sql>
+	<sql id="sort-d">
+		<if test="sortDirection != null">
+			<if test="sortDirection == 'desc'.toString()">
+				desc
+			</if>
+			<if test="sortDirection == 'asc'.toString()">
+				asc
+			</if>
+		</if>
+		<if test="sortDirection == null ||sortDirection == ''"> desc </if>
+	</sql>
+</mapper>
